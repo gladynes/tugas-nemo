@@ -12,7 +12,7 @@ if (!isset($_SESSION['username'])) {
 $username = $_SESSION['username'];
 
 // Query untuk mengambil data pengguna berdasarkan username
-$sql = "SELECT username, role FROM data_user WHERE username = ?";
+$sql = "SELECT username, role, nama, alamat, email FROM data_user WHERE username = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $username);
 $stmt->execute();
@@ -23,12 +23,14 @@ if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
     $user_name = $user['username'];
     $user_role = $user['role'];
+    $user_nama = $user['nama'];
+    $user_alamat = $user['alamat'];
+    $user_email = $user['email'];
 } else {
     // Jika data tidak ditemukan, redirect ke login
     header("Location: login.php");
     exit;
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -67,6 +69,26 @@ if ($result->num_rows > 0) {
         .menu a:hover {
             background-color: #0056b3;
         }
+        .profile {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .profile h2 {
+            text-align: center;
+        }
+        .profile table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .profile table th, .profile table td {
+            text-align: left;
+            padding: 8px 10px;
+            border-bottom: 1px solid #ddd;
+        }
     </style>
 </head>
 <body>
@@ -80,7 +102,30 @@ if ($result->num_rows > 0) {
 <!-- Menu Navigasi -->
 <div class="menu">
     <a href="exit.php">Logout</a>
-    <a href="">chat</a>
+    <a href="chat.php">Chat</a>
+</div>
+
+<!-- Informasi Profil -->
+<div class="profile">
+    <h2>Profil Anda</h2>
+    <table>
+        <tr>
+            <th>Nama</th>
+            <td><?= htmlspecialchars($user_nama) ?></td>
+        </tr>
+        <tr>
+            <th>Username</th>
+            <td><?= htmlspecialchars($user_name) ?></td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td><?= htmlspecialchars($user_email) ?></td>
+        </tr>
+        <tr>
+            <th>Alamat</th>
+            <td><?= htmlspecialchars($user_alamat) ?></td>
+        </tr>
+    </table>
 </div>
 
 </body>
