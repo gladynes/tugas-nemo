@@ -3,39 +3,46 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 session_start();
-include 'db.php'; // File koneksi database Anda
+include 'db.php';
 
-// Inisialisasi variabel untuk error
 $error = '';
 
-// Proses form login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']); 
-    $password = trim($_POST['password']);
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']); // Password plaintext
 
-    // Query dengan prepared statements untuk mencegah SQL Injection
-    $sql = "SELECT * FROM data_user WHERE username = ? AND password = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $username, $password);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 1) {
-        $user = $result->fetch_assoc();
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
-
-        // Redirect berdasarkan role
-        if ($user['role'] === 'admin') {
-            header("Location: admindas.php");
-        } elseif ($user['role'] === 'user') {
-            header("Location: userdas.php");
-        } else {
-            $error = "Role tidak valid!";
-        }
-        exit();
+    if (empty($username) || empty($password)) {
+        $error = "Username dan password tidak boleh kosong!";
     } else {
-        $error = "Username atau password salah!";
+        $sql = "SELECT * FROM data_user WHERE username = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+
+            // Membandingkan password yang diinput dengan password di database (tanpa hashing)
+            if ($password === $user['password']) {
+                $_SESSION['username'] = $user['username'];
+                $_SESSION['role'] = $user['role'];
+                $_SESSION['user_id'] = $user['id'];
+
+                if ($user['role'] === 'admin') {
+                    header("Location: admindas.php");
+                } elseif ($user['role'] === 'user') {
+                    header("Location: userdas.php");
+                } else {
+                    $error = "Role tidak valid!";
+                }
+                exit();
+            } else {
+                $error = "Username atau password salah!";
+            }
+        } else {
+            $error = "Username atau password salah!";
+        }
     }
 }
 ?>
@@ -48,15 +55,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <style>
         body {
             font-family: Arial, sans-serif;
-    background-color: #000000; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
         }
         .login-container {
-            background:	#228B22;
+            background: #228B22;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -66,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .login-container h2 {
             text-align: center;
             margin-bottom: 20px;
-            color: #333;
+            color: #fff;
         }
         .login-container input[type="text"],
         .login-container input[type="password"],
@@ -86,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: background-color 0.3s ease;
         }
         .login-container button:hover {
-            background-color: 	#228B22;
+            background-color: #0056b3;
         }
         .error {
             color: red;
@@ -115,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
         </form>
-        <a href="register.php">buat akun </a>
+        <a href="register.php">Buat akun</a>
     </div>
 </body>
 </html>

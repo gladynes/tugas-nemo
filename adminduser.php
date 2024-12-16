@@ -123,6 +123,7 @@ if ($result_admin && $result_admin->num_rows > 0) {
          <span>Admin not available</span>
     <?php endif; ?>
     <a href="chatuser.php" class="chat-link">Chat User</a>
+    <a href="admindas.php">dasbord admin </a>
 </div>
 
 <div class="profile">

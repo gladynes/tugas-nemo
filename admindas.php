@@ -1,9 +1,22 @@
 <?php
+session_start();
 require 'db.php';
 
-// Query untuk mengambil data dari tabel
-$sql = "SELECT * FROM data_user"; // Ganti dengan nama tabel Anda
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    header("Location: login.php");
+    exit;
+}
+
+if (!$conn) {
+    die("Koneksi database gagal: " . mysqli_connect_error());
+}
+
+$sql = "SELECT * FROM data_user WHERE role != 'admin'";
 $result = $conn->query($sql);
+
+if (!$result) {
+    die("Query error: " . $conn->error);
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,80 +26,41 @@ $result = $conn->query($sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 0;
-        }
-        .header {
-            background-color:#708090;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-        }
-        .menu {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            text-align: center;
-        }
-        .menu a {
-            text-decoration: none;
-            color: white;
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }
+        .header { background-color: #708090; color: white; padding: 10px 20px; text-align: center; }
+        .menu { background-color: #28a745; color: white; padding: 10px; text-align: center; }
+        .menu a { text-decoration: none; color: white; background-color: #007BFF; padding: 10px 20px; margin-right: 10px; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 10px; text-align: left; }
+        .chat-link {
+            display: inline-block;
+            padding: 5px 10px;
             background-color: #007BFF;
-            padding: 10px 20px;
-            margin-right: 10px;
+            color: white;
+            text-decoration: none;
             border-radius: 5px;
-        }
-        .menu a:hover {
-            background-color: #0056b3;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        table, th, td {
-            border: 1px solid #ddd;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
     <div class="header">
         <h1>Dashboard Admin</h1>
+        <p>Selamat datang, <?= htmlspecialchars($_SESSION['username']) ?> (Role: <?= htmlspecialchars($_SESSION['role']) ?>)</p>
     </div>
-
-    <!-- Menu Navigasi -->
     <div class="menu">
-        <a href="userdas.php">Pindah ke Dashboard User</a>
+        <a href="adminduser.php">Pindah ke Dashboard User</a>
         <a href="exit.php">Logout</a>
-        <a href="">chat</a>
     </div>
-
-    <!-- Tabel Data User -->
-    <table border="1" cellpadding="10" cellspacing="0">
+    <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nama</th>
                 <th>Email</th>
-                <th>alamat</th>
-                <th>role</th>
-               
+                <th>Alamat</th>
+                <th>Role</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -98,20 +72,17 @@ $result = $conn->query($sql);
                         <td><?= htmlspecialchars($row['email']) ?></td>
                         <td><?= htmlspecialchars($row['alamat']) ?></td>
                         <td><?= htmlspecialchars($row['role']) ?></td>
-                        <td>
-                           
-                        </td>
+                       <td>
+                         <a href="adminkeuser.php?receiver_id=<?= htmlspecialchars($row['id']) ?>" class="chat-link">Chat</a>
+                     </td>
                     </tr>
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="5">Tidak ada data</td>
+                    <td colspan="6">Tidak ada data pengguna</td>
                 </tr>
             <?php endif; ?>
         </tbody>
     </table>
-
-   
-
 </body>
 </html>
