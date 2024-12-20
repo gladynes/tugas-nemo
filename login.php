@@ -1,29 +1,24 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 session_start();
 include 'db.php';
 
-$error = '';
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']); // Password plaintext
+    $username = ($_POST['username']);
+    $password = ($_POST['password']); 
 
     if (empty($username) || empty($password)) {
         $error = "Username dan password tidak boleh kosong!";
     } else {
-        $sql = "SELECT * FROM data_user WHERE username = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $result = $stmt->get_result();
+       
+        $sql = "SELECT * FROM data_user WHERE username = '$username' AND password = '$password'";
+        $result = $conn->query($sql);
 
-        if ($result->num_rows === 1) {
+        if ($result && $result->num_rows === 1) {
             $user = $result->fetch_assoc();
 
-            // Membandingkan password yang diinput dengan password di database (tanpa hashing)
             if ($password === $user['password']) {
                 $_SESSION['username'] = $user['username'];
                 $_SESSION['role'] = $user['role'];
@@ -46,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,8 +115,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Login</h2>
         <?php if (!empty($error)) echo "<div class='error'>$error</div>"; ?>
         <form method="POST" action="">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
+            <input type="text" name="username" placeholder="Username">
+            <input type="password" name="password" placeholder="Password">
             <button type="submit">Login</button>
         </form>
         <a href="register.php">Buat akun</a>

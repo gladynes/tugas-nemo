@@ -2,6 +2,7 @@
 session_start();
 require 'db.php';
 
+// Tidak ada validasi sesi yang memadai
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
@@ -9,11 +10,9 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-$sql = "SELECT username, role, nama, alamat, email, id FROM data_user WHERE username = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
+// Query langsung tanpa prepared statement (rentan SQL Injection)
+$sql = "SELECT username, role, nama, alamat, email, id FROM data_user WHERE username = '$username'";
+$result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
@@ -22,13 +21,13 @@ if ($result->num_rows > 0) {
     $user_nama = $user['nama'];
     $user_alamat = $user['alamat'];
     $user_email = $user['email'];
-     $user_id = $user['id'];
+    $user_id = $user['id'];
 } else {
     header("Location: login.php");
     exit;
 }
 
-// Query untuk mendapatkan ID admin
+// Query untuk mendapatkan ID admin tanpa validasi hasil
 $sql_admin = "SELECT id FROM data_user WHERE role = 'admin' LIMIT 1";
 $result_admin = $conn->query($sql_admin);
 
@@ -36,8 +35,7 @@ if ($result_admin && $result_admin->num_rows > 0) {
     $admin = $result_admin->fetch_assoc();
     $admin_id = $admin['id'];
 } else {
-    // Handle jika admin tidak ditemukan (opsional, bisa redirect atau tampilkan pesan error)
-    $admin_id = null;
+    $admin_id = null; // Tidak ada validasi jika admin tidak ditemukan
 }
 ?>
 
@@ -104,26 +102,28 @@ if ($result_admin && $result_admin->num_rows > 0) {
             color: white;
             text-decoration: none;
             border-radius: 5px;
-             margin-left: 10px;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
 
 <div class="header">
+    <!-- Rentan XSS karena tidak ada htmlspecialchars -->
     <h1>Dashboard User</h1>
-    <p>Selamat datang, <?= htmlspecialchars($user_name) ?> (Role: <?= htmlspecialchars($user_role) ?>)</p>
+    <p>Selamat datang, <?= $user_name ?> (Role: <?= $user_role ?>)</p>
 </div>
 
 <div class="menu">
-   <a href="exit.php">Logout</a>
+    <a href="exit.php">Logout</a>
     <?php if ($admin_id !== null): ?>
-         <a href="chatad.php" class="chat-link">Chat Admin</a>
+        <!-- Rentan XSS jika $admin_id tidak di-*escape* -->
+        <a href="chatad.php" class="chat-link">Chat Admin</a>
     <?php else: ?>
-         <span>Admin not available</span>
+        <span>Admin not available</span>
     <?php endif; ?>
     <a href="chatuser.php" class="chat-link">Chat User</a>
-    <a href="admindas.php">dasbord admin </a>
+    <a href="admindas.php">Dasbor Admin</a>
 </div>
 
 <div class="profile">
@@ -131,19 +131,19 @@ if ($result_admin && $result_admin->num_rows > 0) {
     <table>
         <tr>
             <th>Nama</th>
-            <td><?= htmlspecialchars($user_nama) ?></td>
+            <td><?= $user_nama ?></td>
         </tr>
         <tr>
             <th>Username</th>
-            <td><?= htmlspecialchars($user_name) ?></td>
+            <td><?= $user_name ?></td>
         </tr>
         <tr>
             <th>Email</th>
-            <td><?= htmlspecialchars($user_email) ?></td>
+            <td><?= $user_email ?></td>
         </tr>
         <tr>
             <th>Alamat</th>
-            <td><?= htmlspecialchars($user_alamat) ?></td>
+            <td><?= $user_alamat ?></td>
         </tr>
     </table>
 </div>

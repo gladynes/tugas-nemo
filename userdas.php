@@ -2,6 +2,7 @@
 session_start();
 require 'db.php';
 
+// Tidak ada pengamanan pada sesi
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit;
@@ -9,35 +10,32 @@ if (!isset($_SESSION['username'])) {
 
 $username = $_SESSION['username'];
 
-$sql = "SELECT username, role, nama, alamat, email, id FROM data_user WHERE username = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $username);
-$stmt->execute();
-$result = $stmt->get_result();
+// Query tanpa prepared statement (rentan SQL Injection)
+$sql = "SELECT username, role, nama, alamat, email, id FROM data_user WHERE username = '$username'";
+$result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     $user = $result->fetch_assoc();
-    $user_name = $user['username'];
+    $user_name = $user['username']; // Tidak ada escaping (rentan XSS)
     $user_role = $user['role'];
     $user_nama = $user['nama'];
     $user_alamat = $user['alamat'];
     $user_email = $user['email'];
-     $user_id = $user['id'];
+    $user_id = $user['id'];
 } else {
     header("Location: login.php");
     exit;
 }
 
-// Query untuk mendapatkan ID admin
+// Query untuk mendapatkan ID admin (rentan SQL Injection)
 $sql_admin = "SELECT id FROM data_user WHERE role = 'admin' LIMIT 1";
 $result_admin = $conn->query($sql_admin);
 
-if ($result_admin && $result_admin->num_rows > 0) {
+if ($result_admin->num_rows > 0) {
     $admin = $result_admin->fetch_assoc();
-    $admin_id = $admin['id'];
+    $admin_id = $admin['id']; // Tidak ada validasi tipe data
 } else {
-    // Handle jika admin tidak ditemukan (opsional, bisa redirect atau tampilkan pesan error)
-    $admin_id = null;
+    $admin_id = null; // Admin tidak ditemukan
 }
 ?>
 
@@ -48,103 +46,130 @@ if ($result_admin && $result_admin->num_rows > 0) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard User</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            box-sizing: border-box;
         }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e0f7f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
         .header {
-            background-color: #007BFF;
-            color: white;
-            padding: 10px 20px;
+            background-color: #009688;
+            color: #fff;
+            padding: 20px;
             text-align: center;
         }
+
+        .header h1 {
+            margin-bottom: 10px;
+        }
+
         .menu {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            text-align: center;
+            background-color: #00796b;
+            display: flex;
+            justify-content: center;
+            padding: 15px 0;
         }
+
         .menu a {
             text-decoration: none;
-            color: white;
-            background-color: #007BFF;
+            color: #fff;
+            background-color: #4db6ac;
             padding: 10px 20px;
-            margin-right: 10px;
+            margin: 0 10px;
             border-radius: 5px;
+            transition: background-color 0.3s;
         }
+
         .menu a:hover {
-            background-color: #0056b3;
+            background-color: #00695c;
         }
+
         .profile {
-            max-width: 800px;
-            margin: 20px auto;
-            background: white;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .profile h2 {
             text-align: center;
+            margin-bottom: 20px;
+            color: #00796b;
         }
+
         .profile table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
         }
+
         .profile table th, .profile table td {
             text-align: left;
-            padding: 8px 10px;
+            padding: 10px;
             border-bottom: 1px solid #ddd;
         }
-        .chat-link {
-            display: inline-block;
-            padding: 5px 10px;
-            background-color: #007BFF;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-             margin-left: 10px;
+
+        .profile table th {
+            color: #009688;
         }
     </style>
 </head>
 <body>
 
-<div class="header">
-    <h1>Dashboard User</h1>
-    <p>Selamat datang, <?= htmlspecialchars($user_name) ?> (Role: <?= htmlspecialchars($user_role) ?>)</p>
-</div>
+<div class="container">
+    <div class="header">
+        <h1>Dashboard User</h1>
+        <p>Selamat datang, <?= $user_name ?> (Role: <?= $user_role ?>)</p>
+    </div>
 
-<div class="menu">
-   <a href="exit.php">Logout</a>
-    <?php if ($admin_id !== null): ?>
-         <a href="chatad.php" class="chat-link">Chat Admin</a>
-    <?php else: ?>
-         <span>Admin not available</span>
-    <?php endif; ?>
-    <a href="chatuser.php" class="chat-link">Chat User</a>
-</div>
+    <div class="menu">
+        <a href="exit.php">Logout</a>
+        <?php if ($admin_id !== null): ?>
+            <a href="chatad.php">Chat Admin</a>
+        <?php else: ?>
+            <span style="color: #ffffff;">Admin not available</span>
+        <?php endif; ?>
+        <a href="chatuser.php">Chat User</a>
+    </div>
 
-<div class="profile">
-    <h2>Profil Anda</h2>
-    <table>
-        <tr>
-            <th>Nama</th>
-            <td><?= htmlspecialchars($user_nama) ?></td>
-        </tr>
-        <tr>
-            <th>Username</th>
-            <td><?= htmlspecialchars($user_name) ?></td>
-        </tr>
-        <tr>
-            <th>Email</th>
-            <td><?= htmlspecialchars($user_email) ?></td>
-        </tr>
-        <tr>
-            <th>Alamat</th>
-            <td><?= htmlspecialchars($user_alamat) ?></td>
-        </tr>
-    </table>
+    <div class="profile">
+        <h2>Profil Anda</h2>
+        <table>
+            <tr>
+                <th>Nama</th>
+                <td><?= $user_nama ?></td>
+            </tr>
+            <tr>
+                <th>Username</th>
+                <td><?= $user_name ?></td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td><?= $user_email ?></td>
+            </tr>
+            <tr>
+                <th>Alamat</th>
+                <td><?= $user_alamat ?></td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 </body>

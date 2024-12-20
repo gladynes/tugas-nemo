@@ -2,18 +2,22 @@
 session_start();
 require 'db.php';
 
+// Tidak ada validasi sesi yang memadai
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: login.php");
     exit;
 }
 
+// Tidak ada pengamanan terhadap koneksi database
 if (!$conn) {
     die("Koneksi database gagal: " . mysqli_connect_error());
 }
 
+// Query langsung tanpa prepared statement (rentan SQL Injection)
 $sql = "SELECT * FROM data_user WHERE role != 'admin'";
 $result = $conn->query($sql);
 
+// Tidak ada validasi terhadap hasil query
 if (!$result) {
     die("Query error: " . $conn->error);
 }
@@ -45,8 +49,9 @@ if (!$result) {
 </head>
 <body>
     <div class="header">
+        <!-- Rentan XSS karena tidak ada htmlspecialchars -->
         <h1>Dashboard Admin</h1>
-        <p>Selamat datang, <?= htmlspecialchars($_SESSION['username']) ?> (Role: <?= htmlspecialchars($_SESSION['role']) ?>)</p>
+        <p>Selamat datang, <?= $_SESSION['username'] ?> (Role: <?= $_SESSION['role'] ?>)</p>
     </div>
     <div class="menu">
         <a href="adminduser.php">Pindah ke Dashboard User</a>
@@ -67,14 +72,16 @@ if (!$result) {
             <?php if ($result->num_rows > 0): ?>
                 <?php while ($row = $result->fetch_assoc()): ?>
                     <tr>
-                        <td><?= htmlspecialchars($row['id']) ?></td>
-                        <td><?= htmlspecialchars($row['nama']) ?></td>
-                        <td><?= htmlspecialchars($row['email']) ?></td>
-                        <td><?= htmlspecialchars($row['alamat']) ?></td>
-                        <td><?= htmlspecialchars($row['role']) ?></td>
-                       <td>
-                         <a href="adminkeuser.php?receiver_id=<?= htmlspecialchars($row['id']) ?>" class="chat-link">Chat</a>
-                     </td>
+                        <!-- Rentan XSS karena tidak ada htmlspecialchars -->
+                        <td><?= $row['id'] ?></td>
+                        <td><?= $row['nama'] ?></td>
+                        <td><?= $row['email'] ?></td>
+                        <td><?= $row['alamat'] ?></td>
+                        <td><?= $row['role'] ?></td>
+                        <td>
+                            <!-- Rentan XSS karena parameter ID tidak di-*escape* -->
+                            <a href="adminkeuser.php?receiver_id=<?= $row['id'] ?>" class="chat-link">Chat</a>
+                        </td>
                     </tr>
                 <?php endwhile; ?>
             <?php else: ?>

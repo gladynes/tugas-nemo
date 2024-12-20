@@ -7,30 +7,40 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'admin' && $_SESSION[
     exit;
 }
 
-$sender_id = $_SESSION['user_id'];
-
-// Query untuk mendapatkan daftar user lain (selain user yang login)
-$sql_users = "SELECT id, nama FROM data_user WHERE id != ? AND role != 'admin' ";
+// Query untuk mendapatkan daftar semua user kecuali user yang sedang login
+$sql_users = "SELECT id, nama FROM data_user WHERE id != ?";
 $stmt_users = $conn->prepare($sql_users);
-$stmt_users->bind_param("i", $sender_id);
-$stmt_users->execute();
+
+if (!$stmt_users) {
+    die("Error preparing SQL query: " . $conn->error);
+}
+
+// Bind parameter untuk mengecualikan user yang sedang login
+$stmt_users->bind_param("i", $_SESSION['user_id']);
+
+if (!$stmt_users->execute()) {
+    die("Error executing SQL query: " . $stmt_users->error);
+}
+
 $result_users = $stmt_users->get_result();
 
+if (!$result_users) {
+    die("Error getting result: " . $stmt_users->error);
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Antar User</title>
-      <style>
+    <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #009688;
         }
         .chat-container {
             max-width: 800px;
@@ -54,10 +64,10 @@ $result_users = $stmt_users->get_result();
             padding: 10px;
             text-align: left;
         }
-          .chat-link {
+        .chat-link {
             display: inline-block;
             padding: 5px 10px;
-            background-color: #007BFF;
+            background-color: #009688;
             color: white;
             text-decoration: none;
             border-radius: 5px;
@@ -80,12 +90,14 @@ $result_users = $stmt_users->get_result();
                 <?php while ($row = $result_users->fetch_assoc()): ?>
                 <tr>
                     <td><?= htmlspecialchars($row['nama']) ?></td>
-                    <td><a href="chat.php?receiver_id=<?= htmlspecialchars($row['id']) ?>" class="chat-link">Chat</a></td>
+                    <td>
+                        <a href="userchat.php?receiver_id=<?= htmlspecialchars($row['id']) ?>" class="chat-link">Chat</a>
+                    </td>
                 </tr>
                 <?php endwhile; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="2">Tidak ada user lain</td>
+                    <td colspan="2">Tidak ada user</td>
                 </tr>
             <?php endif; ?>
             </tbody>

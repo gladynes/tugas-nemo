@@ -2,47 +2,47 @@
 session_start();
 require 'db.php';
 
-// Tidak ada validasi sesi yang memadai
-if (!isset($_SESSION['user_id'])) {
+// Perubahan: Hanya izinkan role 'user'
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
     exit;
 }
 
 $sender_id = $_SESSION['user_id'];
 
-// Query langsung tanpa prepared statement (rentan SQL Injection)
-$sql_admin = "SELECT id FROM data_user WHERE role = 'admin' LIMIT 1";
-$result_admin = $conn->query($sql_admin);
+// Perubahan: Ambil receiver_id dari query parameter atau default
+$receiver_id = isset($_GET['receiver_id']) ? $_GET['receiver_id'] : null;
 
-if ($result_admin && $result_admin->num_rows > 0) {
-    $admin = $result_admin->fetch_assoc();
-    $receiver_id = $admin['id'];
-} else {
-    die("Admin tidak ditemukan.");
+// Jika receiver_id tidak ada, redirect ke halaman pemilihan user
+if (!$receiver_id) {
+    header("Location: pilih_user.php");
+    exit;
 }
 
-// Query langsung tanpa sanitasi (rentan SQL Injection)
+// Fetch receiver's name
 $query_receiver = "SELECT nama FROM data_user WHERE id = '$receiver_id'";
 $result_receiver = $conn->query($query_receiver);
 $receiver_name = 'Unknown User';
 if ($result_receiver && $result_receiver->num_rows > 0) {
     $row_receiver = $result_receiver->fetch_assoc();
-    // Tidak ada sanitasi output (rentan XSS)
-    $receiver_name = $row_receiver['nama'];
+    $receiver_name = htmlspecialchars($row_receiver['nama']);
 }
 
-// Tidak ada validasi input (rentan XSS dan SQL Injection)
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $message = $_POST['message'];
 
-    // Query langsung tanpa sanitasi (rentan SQL Injection)
-    $query = "INSERT INTO messages (sender_id, receiver_id, message) VALUES ('$sender_id', '$receiver_id', '$message')";
-    if (!$conn->query($query)) {
-        die("Gagal mengirim pesan: " . $conn->error);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $message = trim($_POST['message']);
+
+    if (!empty($message)) {
+        $message_cleaned = $conn->real_escape_string($message);
+        $query = "INSERT INTO messages (sender_id, receiver_id, message) VALUES ('$sender_id', '$receiver_id', '$message_cleaned')";
+         if (!$conn->query($query)) {
+            die("Gagal mengirim pesan: " . $conn->error);
+        }
+    } else {
+         echo '<script>alert("Pesan tidak boleh kosong!");</script>';
     }
 }
 
-// Query langsung tanpa prepared statement (rentan SQL Injection)
 $query = "
     SELECT m.*, u.nama as sender_name
     FROM messages m
@@ -63,12 +63,12 @@ if (!$result) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat dengan <?= $receiver_name ?></title>
-    <style>
+     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #e0f7f4;
         }
         .chat-container {
             max-width: 600px;
@@ -85,9 +85,9 @@ if (!$result) {
             border: 1px solid #ddd;
             padding: 10px;
             border-radius: 5px;
-            background: #f9f9f9;
+            background:#009688;
         }
-        .message {
+         .message {
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
@@ -95,13 +95,13 @@ if (!$result) {
             clear: both;
             max-width: 70%;
         }
-        .message.sender {
+         .message.sender {
             background: #007BFF;
             color: #fff;
             text-align: right;
             float: right;
         }
-        .message.receiver {
+         .message.receiver {
             background: #e1e1e1;
             color: #000;
             text-align: left;
@@ -109,7 +109,7 @@ if (!$result) {
         }
         .message .sender-name,
         .message .receiver-name {
-            font-size: 0.8em;
+           font-size: 0.8em;
             display: block;
             margin-bottom: 5px;
         }
@@ -134,6 +134,7 @@ if (!$result) {
         button:hover {
             background: #0056b3;
         }
+        
     </style>
 </head>
 <body>
@@ -144,10 +145,12 @@ if (!$result) {
         <div class="chat">
             <?php while ($message = $result->fetch_assoc()): ?>
                 <div class="message <?= $message['sender_id'] == $sender_id ? 'sender' : 'receiver' ?>">
-                    <span class="<?= $message['sender_id'] == $sender_id ? 'sender-name' : 'receiver-name' ?>">
-                        <?= $message['sender_id'] == $sender_id ? 'Anda' : $message['sender_name'] ?>
-                    </span>
-                    <?= $message['message'] ?>
+                <?php if ($message['sender_id'] == $sender_id): ?>
+                <span class="sender-name">Anda</span>
+             <?php else: ?>
+               <span class="receiver-name"><?= htmlspecialchars($message['sender_name']) ?></span>
+            <?php endif; ?>
+                 <?= htmlspecialchars($message['message']) ?>
                 </div>
             <?php endwhile; ?>
         </div>
