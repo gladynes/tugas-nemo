@@ -14,7 +14,7 @@ if (!$conn) {
 }
 
 // Query langsung tanpa prepared statement (rentan SQL Injection)
-$sql = "SELECT * FROM data_user WHERE role != 'admin'";
+$sql = "SELECT * FROM data_user";
 $result = $conn->query($sql);
 
 // Tidak ada validasi terhadap hasil query
@@ -45,6 +45,20 @@ if (!$result) {
             text-decoration: none;
             border-radius: 5px;
         }
+        .change-role-link {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #ffc107; /* Warna kuning untuk ubah role */
+            color: #000; /* Warna teks hitam */
+            text-decoration: none;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+       .status-message {
+            display: inline-block;
+             margin-left: 5px;
+             font-style: italic;
+       }
     </style>
 </head>
 <body>
@@ -77,10 +91,18 @@ if (!$result) {
                         <td><?= $row['nama'] ?></td>
                         <td><?= $row['email'] ?></td>
                         <td><?= $row['alamat'] ?></td>
-                        <td><?= $row['role'] ?></td>
+                        <td id="role-<?= $row['id'] ?>"><?= $row['role'] ?></td>
                         <td>
                             <!-- Rentan XSS karena parameter ID tidak di-*escape* -->
                             <a href="adminkeuser.php?receiver_id=<?= $row['id'] ?>" class="chat-link">Chat</a>
+                            <!-- Tambahkan link ubah role -->
+                             <?php if ($row['role'] == 'user'): ?>
+                                <a href="#" class="change-role-link change-role" data-id="<?= $row['id'] ?>" data-role="admin">Jadikan Admin</a>
+                             <?php else: ?>
+                                 <a href="#" class="change-role-link change-role" data-id="<?= $row['id'] ?>" data-role="user">Jadikan User</a>
+                             <?php endif; ?>
+                          <span id="status-<?= $row['id'] ?>" class="status-message"></span>
+
                         </td>
                     </tr>
                 <?php endwhile; ?>
@@ -91,5 +113,60 @@ if (!$result) {
             <?php endif; ?>
         </tbody>
     </table>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const changeRoleLinks = document.querySelectorAll('.change-role');
+
+            changeRoleLinks.forEach(link => {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    const userId = this.getAttribute('data-id');
+                    const newRole = this.getAttribute('data-role');
+                    const statusElement = document.getElementById('status-' + userId);
+                    const roleElement = document.getElementById('role-' + userId);
+                    
+                  
+                    // Mengatur teks status menjadi loading
+                    statusElement.textContent = "Loading...";
+
+                    fetch('role.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: 'id=' + encodeURIComponent(userId) + '&role=' + encodeURIComponent(newRole),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                          if (data.success) {
+                            statusElement.textContent = data.message;
+                            roleElement.textContent = newRole;
+
+
+                            // Update link button
+                            this.textContent = (newRole == 'admin') ? 'Jadikan User' : 'Jadikan Admin';
+                            this.setAttribute('data-role', newRole == 'admin' ? 'user' : 'admin');
+                         } else {
+                            statusElement.textContent = data.message;
+                         }
+                         setTimeout(() => {
+                              statusElement.textContent = "";
+                         }, 3000);
+
+
+                    })
+                    .catch(error => {
+                         statusElement.textContent = "Terjadi kesalahan. " + error;
+
+                         setTimeout(() => {
+                              statusElement.textContent = "";
+                         }, 3000);
+
+                    });
+                });
+            });
+        });
+    </script>
 </body>
 </html>
