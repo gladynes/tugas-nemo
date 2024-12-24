@@ -68,21 +68,6 @@ web app ini  merupakan bentuk dari web app dengan kerentan sederhana untuk menco
 );
    ```
 
-## Debugging
-- Pesan debug ditambahkan di beberapa bagian untuk membantu proses pengembangan dan perbaikan jika terjadi masalah:
-  - Saat input kosong.
-  - Saat query SQL dijalankan.
-  - Saat login berhasil atau gagal.
-
-## Teknologi yang Digunakan
-- **Bahasa Pemrograman:** PHP
-- **Database:** MySQL
-- **Front-End:** HTML, CSS
-
-
----
-
-Skrip ini dirancang untuk memberikan dasar yang kuat bagi pengembangan sistem login yang lebih kompleks di masa depan.
 
 ## dasbord admin 
 pada dasbord admin memiliki 2 fitur yakni untuk chat dan merubah role dari user yang ada 
