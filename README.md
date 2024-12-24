@@ -1,12 +1,15 @@
 # README.md
 
 ## Deskripsi Proyek
+web app ini  merupakan bentuk dari web app dengan kerentan sederhana untuk mencoba sqlinjesi dengan adanya halaman login dengan mengunakan  data user yang ada di database 
 
-Skrip ini adalah implementasi dari sistem login berbasis PHP yang memanfaatkan database untuk otentikasi pengguna. Sistem ini mendukung login untuk dua jenis pengguna: admin dan user, dengan pengalihan ke dashboard masing-masing setelah login berhasil.
-
+## Tampilan Web 
+    halaman login 
+  ![alt text](foto/halaman_login.png)
+  ---
 ## Fitur Utama
 
-1. **Validasi Input:**
+1. **Login:**
    - Memastikan bahwa username dan password tidak kosong sebelum memproses login.
    
 2. **Otentikasi Pengguna:**
@@ -21,10 +24,12 @@ Skrip ini adalah implementasi dari sistem login berbasis PHP yang memanfaatkan d
 
 5. **Pesan Kesalahan:**
    - Memberikan feedback kepada pengguna jika terjadi kesalahan seperti input kosong, username/password salah, atau role yang tidak valid.
+ ## Fitur Pada Dasbord Admin 
 
-6. **Tampilan Responsif:**
-   - Antarmuka login yang responsif dan modern dengan gaya CSS yang telah ditentukan.
-
+ ![alt text](<foto/dasbord_admin .png>)
+ 1. **fitur untuk merubah user biasa jadi user**
+     pada ini admin dapat merubah role user melalui dasbord ke database 
+     
 ## Struktur Kode
 
 ### 1. **Bagian Backend**
@@ -71,14 +76,11 @@ Skrip ini adalah implementasi dari sistem login berbasis PHP yang memanfaatkan d
 - **Database:** MySQL
 - **Front-End:** HTML, CSS
 
-## Catatan Penting
-- Pastikan untuk mengamankan query SQL dengan prepared statements untuk mencegah SQL Injection.
-- Password sebaiknya disimpan dalam format hash menggunakan fungsi seperti `password_hash()` untuk meningkatkan keamanan.
 
 ---
 
 Skrip ini dirancang untuk memberikan dasar yang kuat bagi pengembangan sistem login yang lebih kompleks di masa depan.
 
 ## dasbord admin 
-pada dasbord admin memiliki 2 fitur bisa brepindah ke dasbord user dan
-melakukan 
+pada dasbord admin memiliki 2 fitur yakni untuk chat dan merubah role dari user yang ada 
+dasbord admin ini

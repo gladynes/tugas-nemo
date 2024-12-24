@@ -89,9 +89,9 @@ if (!$result_users) {
             <?php if ($result_users->num_rows > 0): ?>
                 <?php while ($row = $result_users->fetch_assoc()): ?>
                 <tr>
-                    <td><?= htmlspecialchars($row['nama']) ?></td>
+                    <td><?= ($row['nama']) ?></td>
                     <td>
-                        <a href="userchat.php?receiver_id=<?= htmlspecialchars($row['id']) ?>" class="chat-link">Chat</a>
+                        <a href="userchat.php?receiver_id=<?=($row['id']) ?>" class="chat-link">Chat</a>
                     </td>
                 </tr>
                 <?php endwhile; ?>
