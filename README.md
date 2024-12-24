@@ -72,11 +72,16 @@ dasbord admin ini
  1. **untuk membuat user jadi admin**
 ---
    pada bagina ini admin dapat merubah pengguna web dari memiliki role user ke admin 
+
 2. **melakukan chat ke user**
-pada dasbord ini admin dapat melakukan chat ke user lain dengan tinggal menekan tombol chat 
+pada dasbord ini admin dapat melakukan chat ke user lain dengan tinggal menekan tombol chat
+
 3. **ubah dasbord**
+
    admin dapat melakukan akses ke dasbord user melalui dasbord admin.
 4. **melihat data user**
+
     pada dasbord ini admin juga bisa melihat data dari user mulai dari nama ,gmail,alamat user 
 5. **logout**
+
     admin dapat logout lasung dari dasbord admin 
