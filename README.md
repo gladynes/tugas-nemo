@@ -76,4 +76,7 @@ dasbord admin ini
 pada dasbord ini admin dapat melakukan chat ke user lain dengan tinggal menekan tombol chat 
 3. **ubah dasbord**
    admin dapat melakukan akses ke dasbord user melalui dasbord admin.
-   
+4. **melihat data user**
+    pada dasbord ini admin juga bisa melihat data dari user mulai dari nama ,gmail,alamat user 
+5. **logout**
+    admin dapat logout lasung dari dasbord admin 
