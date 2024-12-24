@@ -26,9 +26,7 @@ web app ini  merupakan bentuk dari web app dengan kerentan sederhana untuk menco
    - Memberikan feedback kepada pengguna jika terjadi kesalahan seperti input kosong, username/password salah, atau role yang tidak valid.
  ## Fitur Pada Dasbord Admin 
 
- ![alt text](<foto/dasbord_admin .png>)
- 1. **fitur untuk merubah user biasa jadi user**
-     pada ini admin dapat merubah role user melalui dasbord ke database 
+ 
      
 ## Struktur Kode
 
@@ -55,20 +53,27 @@ web app ini  merupakan bentuk dari web app dengan kerentan sederhana untuk menco
    - Akses halaman login melalui browser.
    - Masukkan username dan password yang valid untuk login.
 
-3. **Struktur Tabel `data_user` (Contoh):**
-   ```sql
-  CREATE TABLE data_user(
-  id int(11) NOT NULL,
-  nama varchar(255) NOT NULL,
-  username varchar(255) NOT NULL,
-  email varchar(255) NOT NULL,
-  password varchar(255) NOT NULL,
-  alamat text DEFAULT NULL,
-  role enum('admin','user') NOT NULL DEFAULT 'user'
+```sql
+CREATE TABLE data_user (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  nama VARCHAR(255) NOT NULL,
+  username VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  alamat TEXT DEFAULT NULL,
+  role ENUM('admin', 'user') NOT NULL DEFAULT 'user',
+  PRIMARY KEY (id)
 );
-   ```
-
-
+```
 ## dasbord admin 
 pada dasbord admin memiliki 2 fitur yakni untuk chat dan merubah role dari user yang ada 
 dasbord admin ini
+![alt text](<foto/dasbord_admin .png>)
+ 1. **untuk membuat user jadi admin**
+---
+   pada bagina ini admin dapat merubah pengguna web dari memiliki role user ke admin 
+2. **melakukan chat ke user**
+pada dasbord ini admin dapat melakukan chat ke user lain dengan tinggal menekan tombol chat 
+3. **ubah dasbord**
+   admin dapat melakukan akses ke dasbord user melalui dasbord admin.
+   
