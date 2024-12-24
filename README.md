@@ -57,12 +57,15 @@ web app ini  merupakan bentuk dari web app dengan kerentan sederhana untuk menco
 
 3. **Struktur Tabel `data_user` (Contoh):**
    ```sql
-   CREATE TABLE data_user (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       username VARCHAR(50) NOT NULL,
-       password VARCHAR(255) NOT NULL,
-       role ENUM('admin', 'user') NOT NULL
-   );
+  CREATE TABLE data_user(
+  id int(11) NOT NULL,
+  nama varchar(255) NOT NULL,
+  username varchar(255) NOT NULL,
+  email varchar(255) NOT NULL,
+  password varchar(255) NOT NULL,
+  alamat text DEFAULT NULL,
+  role enum('admin','user') NOT NULL DEFAULT 'user'
+);
    ```
 
 ## Debugging
