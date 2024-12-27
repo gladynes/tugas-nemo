@@ -111,12 +111,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </style>
 </head>
 <body>
+</head>
+<body>
     <div class="login-container">
         <h2>Login</h2>
         <?php if (!empty($error)) echo "<div class='error'>$error</div>"; ?>
         <form method="POST" action="">
-            <input type="text" name="username" placeholder="Username">
-            <input type="password" name="password" placeholder="Password">
+            <input type="text" name="username">
+            <input type="password" name="password">
             <button type="submit">Login</button>
         </form>
         <a href="register.php">Buat akun</a>
